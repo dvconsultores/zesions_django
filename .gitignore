@@ -9828,3 +9828,23 @@ mysite/venv/lib/python3.11/site-packages/rest_framework/management/commands/__in
 mysite/venv/lib/python3.11/site-packages/rest_framework/management/commands/generateschema.py
 mysite/venv/lib/python3.11/site-packages/rest_framework/management/commands/__pycache__/__init__.cpython-311.pyc
 mysite/venv/lib/python3.11/site-packages/rest_framework/management/commands/__pycache__/generateschema.cpython-311.pyc
+
+# Environments 
+.env 
+.venv 
+env/ 
+venv/ 
+ENV/ 
+env.bak/ 
+venv.bak/
+migraciones/
+
+
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+migrations/
+media

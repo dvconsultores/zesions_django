@@ -141,7 +141,7 @@ class ComisionVS(Generico):
 # Verificar que el usuario tenga permisos
 def verificar_permiso(perfil,modulo,accion):
     try:
-        permiso=Permiso.objects.filter(modulo__nombre__exact=modulo,perfil=perfil).first()
+        permiso = Permiso.objects.filter(modulo__nombre__exact=modulo,perfil=perfil).first()
     except:
         return False
     if permiso:
@@ -162,9 +162,6 @@ def crear_super_usuario(request):
         for modelo in modulos.modelos:
             modulo=Modulo(nombre=modelo['nombre'])
             modulo.save()
-            # if modelo['mayor']!=None:
-            #     menu.parent=Modulo.objects.get(router=modelo['parent'])
-            #     menu.save()
         # Super
         superuser=User.objects.create_user(username='super',password='super',is_staff=True, is_superuser=True)
         perfilS=Perfil(usuario=superuser,activo=True,tipo="S")
@@ -179,9 +176,6 @@ def crear_super_usuario(request):
         perfilU.save()
         for m in Modulo.objects.all():
             Permiso.objects.get_or_create(perfil=perfilS,modulo=m,defaults={'leer': True,'escribir': True,'borrar': True,'actualizar': True})
-            # if m.mayor!=None:
-            #     permiso.parent=permiso.objects.get(permiso__id=m.mayor.id)
-            #     permiso.save()
         return "Super creado"
     else:
         return "Ya existe un superusuario"
@@ -261,17 +255,11 @@ def guardar_permisos(data,perfil_n=None,perfil_c=None,perfil=None):
             permisos=Permiso.objects.filter(perfil=perfil_c)
             for per in data:
                 # Si se debe crear un menu, crearlo
-                # padre=crear_menu(instancia,per['parent']) if perfil else None
-                # Obtener menu
                 modulo=modulos.get(nombre__exact=per['nombre'])
                 # Verificar permiso del creador
                 permiso_c=permisos.filter(modulo=modulo).first()
                 if permiso_c:
                     perfil = perfil_n if not perfil else perfil
-                    # if per['parent']:
-                    #     # Obtener menu padre
-                    #     modulop=modulos.get(instancia=instancia,menu__router__exact=per['parent']) if not perfil else padre
-                    #     crear_permiso(instancia,per,modulop,perfil_n,permiso_c)
                     try: 
                         permiso=Permiso.objects.get(modulo=modulo,perfil=perfil)
                     except: 
@@ -285,44 +273,45 @@ def guardar_permisos(data,perfil_n=None,perfil_c=None,perfil=None):
         return None
     except Exception as e:
         # Borrar datos creados
-        try:
-            Permiso.objects.filter(perfil=perfil).delete()
-        except:
-            pass
+        try: Permiso.objects.filter(perfil=perfil).delete()
+        except: pass
         return {'error':e}
+
+def is_email(text): return '@' in text and '.' in text
 
 class LoginNoir(viewsets.ModelViewSet):
     permission_classes=[AllowAny]
     authentication_classes=[BasicAuthentication]
     serializer_class=AuthTokenSerializer
     queryset=User.objects.none()
-    # {"username":"super","password":"super"}
+    
     def create(self,request,format=None):
         data = request.data
-        try:
-            print(data['username'])
-            if '@' in data['username'] and '.' in data['username']:
-                print('email')
-                user = User.objects.get(email__exact=request.data['username'])
-            else:
-                print('username')
-                user = User.objects.get(username__exact=request.data['username'])
-            request.data['username'] = user.username
-        except:
-            return Response({'error':'Not encounter user'},status=status.HTTP_404_NOT_FOUND)
-        serializer=self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user=serializer.validated_data['user']
-        login(request,user)
-        # respuesta={'username':user.username}
         
+        # Search user in data base
+        try: data['username'] = User.objects.get(**{"email__exact": data['username']} if is_email(data['username']) else {"username__exact": data['username']}).username
+        except: return Response({'error':'Not encounter user'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Validate credentials
+        serializer = self.serializer_class(data = data)
+        serializer.is_valid(raise_exception = True)
+        user = serializer.validated_data['user']
+        
+        # Mark login to admin
+        login(data, user)
+        
+        # Get or create token
         token, creado = Token.objects.get_or_create(user__id=user.id, defaults={'user':user})
-        perfil = Perfil.objects.get(usuario=user)
-        permisos = Permiso.objects.filter(perfil=perfil)
+        
+        # Get permissions
+        profile = Perfil.objects.get(usuario=user)
+        permissions = Permiso.objects.filter(perfil=profile)
 
-        dataPermisos = PermisoSerializer(instance=permisos, many=True).data
-       
-        user_d=UserSerializer(user).data
+        # Serialize permissions data
+        dataPermissions = PermisoSerializer(instance=permissions, many=True).data
+        
+        # Serialize user data
+        user_d = UserSerializer(user).data
         data={
             'username':user_d['username'],
             'first_name':user_d['first_name'],
@@ -332,15 +321,12 @@ class LoginNoir(viewsets.ModelViewSet):
             'date_joined':user_d['date_joined'],
             'last_login':user_d['last_login'],
         }
-        return Response({'data':data,'token':token.key, 'permisos': dataPermisos},status=status.HTTP_200_OK)
-    def list(self):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    def retrieve(self):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    def update(self, request):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    def destroy(self, request):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'data':data,'token':token.key, 'permisos': dataPermissions},status=status.HTTP_200_OK)
+    
+    def list(self): return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def retrieve(self): return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def update(self, request): return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def destroy(self, request): return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 @api_view(["GET"])
 @csrf_exempt
