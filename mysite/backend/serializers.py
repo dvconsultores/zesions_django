@@ -43,9 +43,9 @@ class tPaisDocumentoSerializer(serializers.ModelSerializer):
         model = tPaisDocumento
         fields = '__all__'
 
-class tPaisServicioDefixSerializer(serializers.ModelSerializer):
+class tPaisServicioSezionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = tPaisServicioDefix
+        model = tPaisServicioSezions
         fields = '__all__'
 
 class tkycCabeceraSerializer(serializers.ModelSerializer):
@@ -73,9 +73,9 @@ class tkycCuentaSerializer(serializers.ModelSerializer):
         model = tkycCuenta
         fields = '__all__'
 
-class tkycCuentaDefixSerializer(serializers.ModelSerializer):
+class tkycCuentaSezionsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = tkycCuentaDefix
+        model = tkycCuentaSezions
         fields = '__all__'
 
 class FiatTransaccionSerializer(serializers.ModelSerializer):
@@ -129,9 +129,9 @@ class tdataCryptoSerializer(serializers.ModelSerializer):
    ##     model = UsuarioMetodos
    ##     fields = '__all__'
 
-##class UsuarioDefixSerializer(serializers.ModelSerializer):
+##class UsuarioSezionsSerializer(serializers.ModelSerializer):
  ##   class Meta:
-  ##      model = UsuarioDefix
+  ##      model = UsuarioSezions
    ##     fields = '__all__'
 
 ##class UsuarioTransaccionSerializer(serializers.ModelSerializer):

@@ -14,13 +14,13 @@ router.register(r'permisos',PermisoVS,basename='permiso')
 router.register(r'login',LoginNoir,basename='login')
 router.register(r'paises',tPaisVS,basename='tpais')
 router.register(r'paisesdoc',tPaisDocumentoVS,basename='tPaisDocumento')
-router.register(r'paisesdefix',tPaisServicioDefixVS,basename='tPaisServicioDefix')
+router.register(r'paisessezions',tPaisServicioSezionsVS,basename='tPaisServicioSezions')
 router.register(r'kyccabecera',tkycCabeceraVS,basename='tkycCabecera')
 router.register(r'kycdetalle',tkycDetalleVS,basename='tkycDetalle')
 router.register(r'paisbanco',tPaisBancoVS,basename='tPaisBanco')
 router.register(r'tipopago',tTipoPagoVS,basename='tTipoPago')
 router.register(r'kyccuenta',tkycCuentaVS,basename='tkycCuenta')
-router.register(r'kyccuentadefix',tkycCuentaDefixVS,basename='tkycCuentaDefix')
+router.register(r'kyccuentasezions',tkycCuentaSezionsVS,basename='tkycCuentaSezions')
 router.register(r'FiatTransaccion',FiatTransaccionVS,basename='FiatTransaccion')
 router.register(r'cryptocurrency',CryptocurrencyVS,basename='Cryptocurrency')
 router.register(r'token',TokenVS,basename='token')
@@ -30,10 +30,10 @@ router.register(r'datacrypto',tdataCryptoVS,basename='tdataCrypto')
 urlpatterns = [
     path('', include(router.urls)), 
     path('crear-usuario/', crear_nuevo_usuario),
-    path('get-users-defix', get_users_defix),
+    path('get-users-sezions', get_users_sezions),
     path('get-users-admin', get_users_admin),
     path('get-transaction-history', get_transaction_history),
-    path('get-balance-defix', get_balance_defix),
+    path('get-balance-sezions', get_balance_sezions),
     path('act-user-admin', actualizar_usuario_admin),
     path('get-comision/<str:coin>', get_comision),
     #path('get-paises/<str:observacion>', get_paises),
@@ -45,7 +45,7 @@ urlpatterns = [
     path('get-fiat-estatus/<str:observacion>', get_fiat_estatus),
     path('crear-kyc', crear_kyc),
     path('get-tcuenta/<str:observacion>', get_tcuenta),
-    path('get-tcuenta-defix/<str:observacion>', get_tcuenta_defix),
+    path('get-tcuenta-sezions/<str:observacion>', get_tcuenta_sezions),
     path('put-fecha-fiat', put_fecha_fiat),
     path('cancel-buy', cancel_buy),
     path('confirm-sell', confirm_sell),

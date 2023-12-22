@@ -258,11 +258,11 @@ class tPaisDocumentoVS(viewsets.ModelViewSet):
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)   
 
-class tPaisServicioDefixVS(viewsets.ModelViewSet):
+class tPaisServicioSezionsVS(viewsets.ModelViewSet):
     permission_classes=[IsAuthenticated]
     authentication_classes=[TokenAuthentication]
-    queryset=tPaisServicioDefix.objects.all()
-    serializer_class=tPaisServicioDefixSerializer
+    queryset=tPaisServicioSezions.objects.all()
+    serializer_class=tPaisServicioSezionsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
       'pais':['exact'],
@@ -404,11 +404,11 @@ class tkycCuentaVS(viewsets.ModelViewSet):
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)      
 
-class tkycCuentaDefixVS(viewsets.ModelViewSet):
+class tkycCuentaSezionsVS(viewsets.ModelViewSet):
     #permission_classes=[IsAuthenticated]
     #authentication_classes=[TokenAuthentication]
-    queryset=tkycCuentaDefix.objects.all()
-    serializer_class=tkycCuentaDefixSerializer
+    queryset=tkycCuentaSezions.objects.all()
+    serializer_class=tkycCuentaSezionsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
       'pais':['exact'],
@@ -781,11 +781,11 @@ def ValidacionUsuario(request,user):
 @api_view(["GET"])
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
-def get_users_defix(request):
+def get_users_sezions(request):
     perfil=Perfil.objects.get(usuario=request.user)
-    if verificar_permiso(perfil,'UsuariosDefix','leer'):
+    if verificar_permiso(perfil,'Usuarios','leer'):
         if perfil:
-            url = 'https://testnet.defix3.com:3070/api/v1/get-users-defix'
+            url = 'https://testnet.sezions3.com:3070/api/v1/get-users-sezions'
             response = requests.get(url, headers={'Authorization':'Token caballoviejo'})
             data = response.json()
             return Response(data,status=status.HTTP_200_OK)
@@ -850,11 +850,10 @@ def get_transaction_history(request):
     perfil=Perfil.objects.get(usuario=request.user)
     if verificar_permiso(perfil,'Transacciones','leer'):
         if perfil:
-            data=request.data
-            #engine = pg.connect("dbname='defix3' user='gf' host='157.230.2.213' port='5432' password='uPKsp22tBeBC506WRBv21d7kniWiELwg'")
-            engine = create_engine('postgresql+psycopg2://gf:uPKsp22tBeBC506WRBv21d7kniWiELwg@157.230.2.213/defix3')
+            data = request.data
+            engine = create_engine('postgresql+psycopg2://gf:uPKsp22tBeBC506WRBv21d7kniWiELwg@157.230.2.213/sezions3')
             query = "select * from transactions where \
-                                                ((from_defix = '" + data['defixId'] + "' or to_defix = '" + data['defixId'] + "') or ('%%' = '" + data['defixId'] + "' or '%%' = '" + data['defixId'] + "'))\
+                                                ((from_sezions = '" + data['sezionsId'] + "' or to_sezions = '" + data['sezionsId'] + "') or ('%%' = '" + data['sezionsId'] + "' or '%%' = '" + data['sezionsId'] + "'))\
                                                 and (coin = '" + data['coin'] + "' or '%%' = '" + data['coin'] + "')\
                                                 and (date_year = '" + data['date_year'] + "' or '%%' = '" + data['date_year'] + "')\
                                                 and (date_month = '" + data['date_month'] + "' or '%%' = '" + data['date_month'] + "')"
@@ -866,12 +865,11 @@ def get_transaction_history(request):
 @api_view(["GET"])
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
-def get_balance_defix(request):
+def get_balance_sezions(request):
     perfil=Perfil.objects.get(usuario=request.user)
     if verificar_permiso(perfil,'Balance','leer'):
         if perfil:
-            #engine = pg.connect("dbname='defix3' user='gf' host='157.230.2.213' port='5432' password='uPKsp22tBeBC506WRBv21d7kniWiELwg'")
-            engine = create_engine('postgresql+psycopg2://gf:uPKsp22tBeBC506WRBv21d7kniWiELwg@157.230.2.213/defix3')
+            engine = create_engine('postgresql+psycopg2://gf:uPKsp22tBeBC506WRBv21d7kniWiELwg@157.230.2.213/sezions3')
             query = "select * from balance"
             df = pd.read_sql_query(query, con=engine)
             jsondf = json.loads(df.to_json(orient='records'))
@@ -1084,9 +1082,9 @@ def get_tcuenta(request,observacion):
 @api_view(["GET"])
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
-def get_tcuenta_defix(request,observacion):
+def get_tcuenta_sezions(request,observacion):
     data = []
-    Cuentas=tkycCuentaDefix.objects.filter(pais=observacion)
+    Cuentas=tkycCuentaSezions.objects.filter(pais=observacion)
     for dato in Cuentas:
         estatus='X'
         item = {
@@ -1123,7 +1121,7 @@ def get_tcuenta_defix(request,observacion):
 def crear_fiat(request):     
     datos = request.data
     user = User.objects.get(username=request.user)
-    Cuenta=tkycCuentaDefix.objects.get(id=datos['idCuenta']) if datos['accion'] == 'C' else tkycCuenta.objects.get(id=datos['idCuenta']) 
+    Cuenta=tkycCuentaSezions.objects.get(id=datos['idCuenta']) if datos['accion'] == 'C' else tkycCuenta.objects.get(id=datos['idCuenta']) 
     Cuentas=Cuenta
     tbanco=tPaisBanco.objects.get(id=Cuentas.banco.id)
     fpais = tPais.objects.get(id=tbanco.pais.id)
@@ -1425,14 +1423,14 @@ def SendEmailFiat(accion,cantidad,monto,user,referencia,email,cripto):
             operacion = 'COMPRA'  
             valor=monto  
         html_message = render_to_string('fiat.html', 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': user,
             'operacion' : operacion,
             'referencia':  referencia,
             'monto':valor,
             'moneda':cripto,}
             )
-        to ,from_email = 'noreply@defix3.com', email
+        to ,from_email = 'noreply@sezions3.com', email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
         msg.attach_alternative(html_message, "text/html")
@@ -1453,14 +1451,14 @@ def SendEmailFiatUser(accion,cantidad,monto,user,referencia,email,cripto,idioma)
             valor=monto
 
         html_message = render_to_string('fiatuser.html' if idioma=='en' else 'fiatuser_es.html', 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': user,
             'operacion' : operacion,
             'referencia':  referencia,
             'monto':valor,
             'moneda':cripto,}
             )
-        from_email,to = 'noreply@defix3.com', email
+        from_email,to = 'noreply@sezions3.com', email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
         msg.attach_alternative(html_message, "text/html")
@@ -1480,11 +1478,11 @@ def SendEmailFiatUserCode(UserName):
         operacion = 'Código de verificación de FIAT'
       
         html_message = render_to_string('fiatusercode.html', 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': UserName,
             'tokenemail':  TokenEmail,}
             )
-        from_email,to = 'noreply@defix3.com', Email
+        from_email,to = 'noreply@sezions3.com', Email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
         msg.attach_alternative(html_message, "text/html")
@@ -1505,7 +1503,7 @@ def SendEmailFiatUserToken(UserName,idioma):
         operacion = 'Código de verificación de FIAT'
       
         html_message = render_to_string('fiatusercode.html'  if idioma=='en' else 'fiatusercode_es.html', 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': UserName,
             't1':TokenEmail[0],
             't2':TokenEmail[1],
@@ -1515,7 +1513,7 @@ def SendEmailFiatUserToken(UserName,idioma):
             }
             )
         print('3')
-        from_email,to = 'noreply@defix3.com', Email
+        from_email,to = 'noreply@sezions3.com', Email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
         msg.attach_alternative(html_message, "text/html")
@@ -1551,7 +1549,7 @@ def SendEmailEstatusFIAT(request):
             'numero':datos['referencia'],
             'estatus':estado,}
             )
-        from_email,to = 'noreply@defix3.com', datos['email']
+        from_email,to = 'noreply@sezions3.com', datos['email']
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
         msg.attach_alternative(html_message, "text/html")
@@ -1577,7 +1575,7 @@ def SendEmailEstatusKYC(request):
          'numero' : datos['numero'],
          'estatus' : estado,}
             )
-    from_email,to = 'noreply@defix3.com', datos['email']
+    from_email,to = 'noreply@sezions3.com', datos['email']
     text_content = 'This is an important message.'
     msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
     msg.attach_alternative(html_message, "text/html")
@@ -1592,12 +1590,12 @@ def SendEmailKYC(idpais,user,email):
         pais=tPais.objects.get(id=idpais)
         operacion = 'REGISTRO DE KYC en ' + pais.nombre
         html_message = render_to_string('kyc.html' , 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': user,
             'operacion' : operacion,
             }
             )
-        to ,from_email = 'noreply@defix3.com', email
+        to ,from_email = 'noreply@sezions3.com', email
         #to ,from_email = email, email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
@@ -1615,13 +1613,13 @@ def SendEmailKYCUser(idpais,user,email,idioma):
         pais=tPais.objects.get(id=idpais)
         operacion = 'REGISTRO DE KYC en ' + pais.nombre
         html_message = render_to_string('kycuser.html'  if idioma=='en' else 'kycuser_es.html', 
-            { 'user_defix': 'ADMINISTRADOR DEFIX',
+            { 'user_sezions': 'ADMINISTRADOR SEZIONS',
             'user_fiat': user,
             'operacion' : operacion,
             'pais' : pais.nombre,
             }
             )
-        from_email,to = 'noreply@defix3.com', email
+        from_email,to = 'noreply@sezions3.com', email
         #to ,from_email = email, email
         text_content = 'This is an important message.'
         msg = EmailMultiAlternatives(operacion, text_content, from_email, [to])
@@ -1669,7 +1667,7 @@ def generar_historico_fiat(request,fecha_inicio,fecha_fin):
                 ## Primera fila del excel
                 excel_ws.write(i, 0, 'Fecha Creación', estilo)
                 excel_ws.write(i, 1, 'Estatus', estilo)
-                excel_ws.write(i, 2, 'Usuario Defix', estilo)
+                excel_ws.write(i, 2, 'Usuario Sezions', estilo)
                 excel_ws.write(i, 3, 'Acción', estilo)
                 excel_ws.write(i, 4, 'Referencia', estilo)
                 excel_ws.write(i, 5, 'País', estilo)

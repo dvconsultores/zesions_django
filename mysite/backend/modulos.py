@@ -1,5 +1,5 @@
 modelos=[
-    {'nombre':'UsuariosDefix'},
+    {'nombre':'Usuarios'},
     {'nombre':'Transacciones'},
     {'nombre':'Balance'},
     {'nombre':'UsersAdmin'},

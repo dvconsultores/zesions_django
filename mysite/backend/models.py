@@ -43,7 +43,7 @@ class Token(models.Model):
 
 class Perfil(models.Model):
     TIPO = (('S', 'Super'), ('A', 'Admin'),
-            ('U', 'Usuario'), ('B', 'Banco'), ('D', 'Defix'))
+            ('U', 'Usuario'), ('B', 'Banco'), ('D', 'Sezions'))
     usuario = models.OneToOneField(
         User, on_delete=models.CASCADE, help_text="usuario asociado")
     activo = models.BooleanField(
@@ -102,8 +102,7 @@ class Permiso(models.Model):
 
 
 class Comision(models.Model):
-    coin = models.CharField(max_length=32, null=False,
-                            blank=False, primary_key=True)
+    coin = models.CharField(max_length=32, null=False,blank=False, primary_key=True)
     nombre = models.CharField(max_length=255, null=False, blank=False)
     blockchain = models.CharField(max_length=255, null=False, blank=False)
     transfer = models.FloatField(null=False, blank=False)
@@ -171,9 +170,9 @@ class tPaisDocumento(models.Model):
         return '%s - %s - %s' % (self.nombre, self.pais.id, self.pais.nombre)
 
 
-class tPaisServicioDefix(models.Model):
+class tPaisServicioSezions(models.Model):
     nombre = models.TextField(
-        max_length=120, null=False, blank=False, help_text="Servicio Defix x Pais")
+        max_length=120, null=False, blank=False, help_text="Servicio Sezions x Pais")
     datos = models.TextField(max_length=200, null=True, blank=True,
                              help_text="Detalle de infirmacion de FIAT x Pais")
     pais = models.ForeignKey(tPais, null=False, blank=False,
@@ -299,7 +298,7 @@ class tkycCuenta(models.Model):
         return '%s - %s - %s' % (self.kyccabecera.id, self.habilitado, self.titular)
 
 
-class tkycCuentaDefix(models.Model):
+class tkycCuentaSezions(models.Model):
     pais = models.ForeignKey(tPais, null=False, blank=False,
                              on_delete=models.CASCADE, help_text="Pais asociado")
     banco = models.ForeignKey(tPaisBanco, null=True, blank=True,
@@ -329,7 +328,7 @@ class tkycCuentaDefix(models.Model):
 # def __str__(self):
 # return  '%s - %s - %s'%(self.pais.nombre,self.nombre,self.datos)
 
-# class UsuarioDefix(models.Model):
+# class UsuarioSezions(models.Model):
 # nombre=models.TextField(max_length=120,unique=True, null=False, blank=False, primary_key=True,help_text="Nombre Pais")
 # fecha_creacion=models.DateTimeField(null=True,blank=True,help_text="Fecha creacion del usuario")
 # ESTATUS=(('I','Inactivo'),('A','Aprobada'))
@@ -405,8 +404,8 @@ class FiatTransaccion(models.Model):
 class tdataCrypto(models.Model):
     key = models.TextField(max_length=150, blank=True,
                            null=True, help_text="Nombre del token")  # "usdt",
-    # juanochando.defix3
-    wallet_defix = models.TextField(max_length=150, blank=True,
+    # juanochando.sezions3
+    wallet_sezions = models.TextField(max_length=150, blank=True,
                              null=True, help_text="ruta del token")
     title = models.TextField(max_length=150, blank=True, null=True,
                              help_text="titulo del token")  # "USDT (ERC20)",
@@ -417,4 +416,4 @@ class tdataCrypto(models.Model):
     habilitado = models.BooleanField(default=True, help_text="Esta activo?")
 
     def __str__(self):
-        return '%s - %s - %s' % (self.key, self.wallet_defix, self.title)
+        return '%s - %s - %s' % (self.key, self.wallet_sezions, self.title)
